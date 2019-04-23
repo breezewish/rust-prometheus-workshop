@@ -5,15 +5,16 @@ use evmap::{ReadHandle, WriteHandle};
 use std::sync::{Arc, Mutex};
 
 use self::metrics::*;
+use add_metrics::flush_metrics;
 
 struct KvMap {
     pub read_handle: ReadHandle<String, String>,
     pub write_handle: Arc<Mutex<WriteHandle<String, String>>>,
 }
 
+#[flush_metrics(may_flush_metrics)]
 fn api_get(map: web::Data<KvMap>, param: web::Path<String>) -> impl Responder {
     let timer = coarsetime::Instant::now();
-    may_flush_metrics();
 
     let key = &*param;
     for _ in 0..100 {
@@ -36,10 +37,10 @@ fn api_get(map: web::Data<KvMap>, param: web::Path<String>) -> impl Responder {
     respond
 }
 
+#[flush_metrics(may_flush_metrics)]
 fn api_set(map: web::Data<KvMap>, param: web::Path<(String, String)>) -> impl Responder {
-    may_flush_metrics();
     let timer = coarsetime::Instant::now();
-    
+
     let mut write_handle = map.write_handle.lock().unwrap();
     let (key, value) = (&param.0, &param.1);
     for _ in 0..100 {
@@ -57,12 +58,10 @@ fn api_set(map: web::Data<KvMap>, param: web::Path<(String, String)>) -> impl Re
     respond
 }
 
+#[flush_metrics(may_flush_metrics)]
 fn api_metrics() -> impl Responder {
     use prometheus::{Encoder, TextEncoder};
-
     let timer = coarsetime::Instant::now();
-    may_flush_metrics();
-
     let metric_families = prometheus::gather();
     let mut buffer = vec![];
     let encoder = TextEncoder::new();

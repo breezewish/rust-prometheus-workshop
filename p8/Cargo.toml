@@ -1,5 +1,5 @@
 [package]
-name = "p7"
+name = "p8"
 version = "0.1.0"
 edition = "2018"
 
@@ -9,3 +9,7 @@ prometheus = "0.5"
 lazy_static = "1.3"
 evmap = "4.2.2"
 coarsetime = "0.1"
+
+[dependencies.add_metrics]
+version = "0.1"
+path = "./add_metrics" 
